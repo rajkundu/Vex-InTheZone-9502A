@@ -111,11 +111,8 @@ void gyroTurn(int target, float k_p)
 	stopDriving();
 }
 
-task autonomous()
+task liftHoist()
 {
-	//Reset gyro
-	SensorValue[gyro] = 0;
-
 	//Raise hoist
 	while(SensorValue[hoistQuad] < 80)
 	{
@@ -125,6 +122,11 @@ task autonomous()
 	motor[leftHoist] = -16;
 	motor[rightHoist] = 16;
 
+	return;
+}
+
+task lowerGoalLift()
+{
 	//Lower goal lift
 	while(SensorValue[liftQuad] > -210)
 	{
@@ -133,6 +135,22 @@ task autonomous()
 	}
 	motor[leftLift] = 0;
 	motor[rightLift] = 0;
+
+	return;
+}
+
+task autonomous()
+{
+	//Reset gyro
+	SensorValue[gyro] = 0;
+
+	startTask(liftHoist);
+	while(SensorValue[hoistQuad] < 20)
+	{
+		EndTimeSlice();
+	}
+	wait1Msec(250);
+	startTask(lowerGoalLift);
 
 	//Drive straight
 	drive(32, 0);
@@ -196,6 +214,7 @@ task autonomous()
 	motor[leftLift] = 0;
 	motor[rightLift] = 0;
 
+	/*
 	//Lower hoist
 	while(SensorValue[hoistQuad] > 60)
 	{
@@ -222,6 +241,7 @@ task autonomous()
 	}
 	motor[leftHoist] = 0;
 	motor[rightHoist] = 0;
+	*/
 
 	//Drive backwards out of 10 point zone
 	drive(-127, 0);
