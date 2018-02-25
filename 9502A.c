@@ -20,49 +20,17 @@
 #pragma competitionControl(Competition)
 #include "Vex_Competition_Includes.c"
 
+#define TEAM_A
+#include "../Include/LCD3.0.c"
+
 //--------------------------------------------------------------------//
-
-void resetRobot()
-{
-	//Release goal retainer
-	while(SensorValue[goalRetainerPot] > 0)
-	{
-		motor[goalRetainer] = -127;
-	}
-	motor[goalRetainer] = 0;
-
-	//Reset mobile goal lift
-  while(SensorValue[liftBump] == 0)
-  {
-  	motor[leftLift] = 96;
-		motor[rightLift] = -96;
-  }
-  motor[leftLift] = 0;
-	motor[rightLift] = 0;
-
-	//Reset hoist limit
-  while(SensorValue[hoistLimit] == 0)
-  {
-  	motor[leftHoist] = 8;
-		motor[rightHoist] = -8;
-  }
-	wait1Msec(500);
-	motor[leftHoist] = -24;
-	motor[rightHoist] = 24;
-	wait1Msec(750);
-  motor[leftHoist] = 0;
-	motor[rightHoist] = 0;
-
-  wait1Msec(1000);
-  SensorValue[liftQuad] = 0;
-  SensorValue[hoistQuad] = 0;
-}
 
 void pre_auton()
 {
   bStopTasksBetweenModes = true;
   bDisplayCompetitionStatusOnLcd = false;
 
+  startTask(autonomousSelector);
   resetRobot();
 }
 
@@ -80,175 +48,46 @@ int deadZone(int inputVal, int deadZoneVal)
 	}
 }
 
-void drive(int y, int r)
-{
-	motor[leftDrive] = y + r;
-	motor[rightDrive] = -y + r;
-}
-void stopDriving()
-{
-	motor[leftDrive] = 0;
-	motor[rightDrive] = 0;
-}
-void gyroTurn(int target, float k_p)
-{
-	int pidSpeed;
-	int error = 0;
-	string debugString;
-	while((-SensorValue[gyro] / 10.0) != target)
-	{
-		//Set error
-		error = target - (-SensorValue[gyro] / 10.0);
-		//Set pidSpeed using error and constants
-		pidSpeed = k_p * error;
-		//Max speed 64
-		pidSpeed = (pidSpeed > 64) ? 64 : pidSpeed;
-		drive(0, pidSpeed);
-
-		sprintf(debugString, "%f", -SensorValue[gyro] / 10.0);
-		displayLCDCenteredString(0, debugString);
-	}
-	stopDriving();
-}
-
-task liftHoist()
-{
-	//Raise hoist
-	while(SensorValue[hoistQuad] < 80)
-	{
-		motor[leftHoist] = -127;
-		motor[rightHoist] = 127;
-	}
-	motor[leftHoist] = -16;
-	motor[rightHoist] = 16;
-
-	return;
-}
-
-task lowerGoalLift()
-{
-	//Lower goal lift
-	while(SensorValue[liftQuad] > -210)
-	{
-		motor[leftLift] = -96;
-		motor[rightLift] = 96;
-	}
-	motor[leftLift] = 0;
-	motor[rightLift] = 0;
-
-	return;
-}
-
-task dropCone()
-{
-	//Lower hoist
-	while(SensorValue[hoistQuad] > 60)
-	{
-		motor[leftHoist] = 64;
-		motor[rightHoist] = -64;
-	}
-	motor[leftHoist] = 16;
-	motor[rightHoist] = 16;
-
-	//Open claw/drop cone
-	motor[claw] = +127;
-	wait1Msec(500);
-
-	//Raise hoist
-	while(SensorValue[hoistQuad] < 90)
-	{
-		motor[leftHoist] = -127;
-		motor[rightHoist] = 127;
-	}
-	motor[leftHoist] = 0;
-	motor[rightHoist] = 0;
-	motor[claw] = 0;
-
-	return;
-}
-
 task autonomous()
 {
-	//Reset gyro
-	SensorValue[gyro] = 0;
-
-	startTask(liftHoist);
-	while(SensorValue[hoistQuad] < 20)
+	switch(routineNum)
 	{
-		EndTimeSlice();
+		case 0:
+		{
+			//Do nothing
+			break;
+		}
+		case 1:
+		{
+			//Left side > Cones > 20-point zone
+			leftTwentyCones();
+			break;
+		}
+		case 2:
+		{
+			//Right side > Cones > 20-point zone
+			rightTwentyCones();
+			break;
+		}
+		case 3:
+		{
+			//Left side > Loader > 20-point zone
+			leftTwentyLoader();
+			break;
+		}
+		case 4:
+		{
+			//Right side > Loader > 20-point zone
+			rightTwentyLoader();
+			break;
+		}
+		default:
+		{
+			break;
+		}
 	}
-	wait1Msec(250);
-	startTask(lowerGoalLift);
-
-	//Drive straight
-	drive(32, 0);
-	wait1Msec(100);
-	drive(64, 0);
-	wait1Msec(100);
-	drive(127, 0);
-	wait1Msec(2550);
-	stopDriving();
-
-	//Lift goal
-	while(SensorValue[liftQuad] < -15)
-	{
-		motor[leftLift] = 127;
-		motor[rightLift] = -127;
-	}
-	motor[leftLift] = 0;
-	motor[rightLift] = 0;
-	//Stop driving
-	stopDriving();
-
-	//Activate goal retainer
-	while(SensorValue[goalRetainerPot] < 1600)
-	{
-		motor[goalRetainer] = 127;
-	}
-	motor[goalRetainer] = 20;
-
-	//Pause
-	wait1Msec(250);
-
-	//Drive backward
-	drive(-127, 0);
-
-	startTask(dropCone);
-
-	wait1Msec(2250);
-	stopDriving();
-
-	//Pause
-	wait1Msec(250);
-
-	//Turn around
-	gyroTurn(165, 4.5);
-
-	//Drive straight into 10 point zone
-	drive(127, 0);
-	wait1Msec(1500);
-	stopDriving();
-
-	//Release goal retainer
-	while(SensorValue[goalRetainerPot] > 1600)
-	{
-		motor[goalRetainer] = -127;
-	}
-	motor[goalRetainer] = 0;
-
-	//Lower goal lift
-	while(SensorValue[liftQuad] > -210)
-	{
-		motor[leftLift] = -96;
-		motor[rightLift] = 96;
-	}
-	motor[leftLift] = 0;
-	motor[rightLift] = 0;
-
-	//Drive backwards out of 10 point zone
-	drive(-127, 0);
-	wait1Msec(500);
-	stopDriving();
+	bLCDBacklight = true;
+	displayLCDCenteredString(1, "^ Running Auto ^");
 }
 
 //--------------------------------------------------------------------//
@@ -261,7 +100,6 @@ task usercontrol()
 	int hoistSpeed;
 	bool mobileSideFront = true;
 	bool mobileGoalDetectorEnabled = true;
-	char lcdDebug[17];
 
   while(true)
 	{
@@ -276,7 +114,19 @@ task usercontrol()
 			mobileSideFront = !mobileSideFront;
 		}
 		y = mobileSideFront ? deadZone(vexRT[Ch3], 16) : -deadZone(vexRT[Ch3], 16);
-		r = (vexRT[Btn5U] == 1) ? -64 : (vexRT[Btn6U] == 1) ? 64 : deadZone(vexRT[Ch1], 16) / 1.5;
+
+		//If stopped...
+		if(y != 0)
+		{
+			//Make rotation less sensitive
+			r = (vexRT[Btn5U] == 1) ? -64 : (vexRT[Btn6U] == 1) ? 64 : deadZone(vexRT[Ch1], 16) / 1.5;
+		}
+		//Else...
+		else
+		{
+			//Make rotation full power
+			r = (vexRT[Btn5U] == 1) ? -127 : (vexRT[Btn6U] == 1) ? 127 : deadZone(vexRT[Ch1], 16);
+		}
 
 		motor[leftDrive] = y + r;
 		motor[rightDrive] = -y + r;
@@ -381,8 +231,6 @@ task usercontrol()
 			resetRobot();
 		}
 
-		sprintf(lcdDebug, "%d", SensorValue[goalRetainerPot]);
-		displayLCDCenteredString(1, lcdDebug);
 		wait1Msec(50);
 	}
 }
