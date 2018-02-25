@@ -1,3 +1,4 @@
+#pragma config(Sensor, in1,    goalRetainerPot, sensorPotentiometer)
 #pragma config(Sensor, in7,    hoistPot,       sensorPotentiometer)
 #pragma config(Sensor, in8,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl1,  liftQuad,       sensorQuadEncoder)
@@ -5,6 +6,7 @@
 #pragma config(Sensor, dgtl5,  mobileGoalDetector, sensorSONAR_raw)
 #pragma config(Sensor, dgtl7,  liftBump,       sensorTouch)
 #pragma config(Sensor, dgtl8,  hoistLimit,     sensorTouch)
+#pragma config(Motor,  port1,           goalRetainer,  tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           leftDrive,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           rightDrive,    tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           leftLift,      tmotorVex393_MC29, openLoop)
@@ -22,10 +24,14 @@
 
 void resetRobot()
 {
-  motor[claw] = -127;
-  wait1Msec(1000);
-  motor[claw] = 0;
+	//Release goal retainer
+	while(SensorValue[goalRetainerPot] > 0)
+	{
+		motor[goalRetainer] = -127;
+	}
+	motor[goalRetainer] = 0;
 
+	//Reset mobile goal lift
   while(SensorValue[liftBump] == 0)
   {
   	motor[leftLift] = 96;
@@ -34,11 +40,7 @@ void resetRobot()
   motor[leftLift] = 0;
 	motor[rightLift] = 0;
 
-	while((SensorValue[hoistLimit] == 0)&&(SensorValue[mobileGoalDetector] > 2000))
-	{
-		motor[leftHoist] = 48;
-		motor[rightHoist] = -48;
-	}
+	//Reset hoist limit
   while(SensorValue[hoistLimit] == 0)
   {
   	motor[leftHoist] = 8;
@@ -78,29 +80,52 @@ int deadZone(int inputVal, int deadZoneVal)
 	}
 }
 
-void drive(int left, int right)
+void drive(int y, int r)
 {
-	motor[leftDrive] = -right;
-	motor[rightDrive] = left;
+	motor[leftDrive] = y + r;
+	motor[rightDrive] = -y + r;
 }
 void stopDriving()
 {
 	motor[leftDrive] = 0;
 	motor[rightDrive] = 0;
 }
+void gyroTurn(int target, float k_p)
+{
+	int pidSpeed;
+	int error = 0;
+	string debugString;
+	while((-SensorValue[gyro] / 10.0) != target)
+	{
+		//Set error
+		error = target - (-SensorValue[gyro] / 10.0);
+		//Set pidSpeed using error and constants
+		pidSpeed = k_p * error;
+		//Max speed 64
+		pidSpeed = (pidSpeed > 64) ? 64 : pidSpeed;
+		drive(0, pidSpeed);
+
+		sprintf(debugString, "%f", -SensorValue[gyro] / 10.0);
+		displayLCDCenteredString(0, debugString);
+	}
+	stopDriving();
+}
 
 task autonomous()
 {
+	//Reset gyro
+	SensorValue[gyro] = 0;
+
 	//Raise hoist
-	while(SensorValue[hoistQuad] < 90)
+	while(SensorValue[hoistQuad] < 80)
 	{
 		motor[leftHoist] = -127;
 		motor[rightHoist] = 127;
 	}
-	motor[leftHoist] = 0;
-	motor[rightHoist] = 0;
+	motor[leftHoist] = -16;
+	motor[rightHoist] = 16;
 
-	//Lower lift
+	//Lower goal lift
 	while(SensorValue[liftQuad] > -210)
 	{
 		motor[leftLift] = -96;
@@ -110,8 +135,12 @@ task autonomous()
 	motor[rightLift] = 0;
 
 	//Drive straight
-	drive(127, 88);
-	wait1Msec(2500);
+	drive(32, 0);
+	wait1Msec(100);
+	drive(64, 0);
+	wait1Msec(100);
+	drive(127, 0);
+	wait1Msec(2550);
 	stopDriving();
 
 	//Lift goal
@@ -125,9 +154,78 @@ task autonomous()
 	//Stop driving
 	stopDriving();
 
-	wait1Msec(500);
-	drive(127, -127);
+	//Activate goal retainer
+	while(SensorValue[goalRetainerPot] < 1600)
+	{
+		motor[goalRetainer] = 127;
+	}
+	motor[goalRetainer] = 20;
+
+	//Pause
+	wait1Msec(250);
+
+	//Drive backward
+	drive(-127, 0);
+	wait1Msec(2250);
+	stopDriving();
+
+	//Pause
+	wait1Msec(250);
+
+	//Turn around
+	gyroTurn(165, 4.5);
+
+	//Drive straight into 10 point zone
+	drive(127, 0);
+	wait1Msec(1500);
+	stopDriving();
+
+	//Release goal retainer
+	while(SensorValue[goalRetainerPot] > 1600)
+	{
+		motor[goalRetainer] = -127;
+	}
+	motor[goalRetainer] = 0;
+
+	//Lower goal lift
+	while(SensorValue[liftQuad] > -210)
+	{
+		motor[leftLift] = -96;
+		motor[rightLift] = 96;
+	}
+	motor[leftLift] = 0;
+	motor[rightLift] = 0;
+
+	//Lower hoist
+	while(SensorValue[hoistQuad] > 60)
+	{
+		motor[leftHoist] = 64;
+		motor[rightHoist] = -64;
+	}
+	motor[leftHoist] = 16;
+	motor[rightHoist] = 16;
+
+	//Open claw/drop cone
+	motor[claw] = +127;
+	wait1Msec(600);
+	motor[claw] = -127;
+	wait1Msec(100);
+	motor[claw] = +127;
 	wait1Msec(1000);
+	motor[claw] = 0;
+
+	//Raise hoist
+	while(SensorValue[hoistQuad] < 90)
+	{
+		motor[leftHoist] = -127;
+		motor[rightHoist] = 127;
+	}
+	motor[leftHoist] = 0;
+	motor[rightHoist] = 0;
+
+	//Drive backwards out of 10 point zone
+	drive(-127, 0);
+	wait1Msec(500);
 	stopDriving();
 }
 
@@ -156,19 +254,10 @@ task usercontrol()
 			mobileSideFront = !mobileSideFront;
 		}
 		y = mobileSideFront ? deadZone(vexRT[Ch3], 16) : -deadZone(vexRT[Ch3], 16);
-		r = deadZone(vexRT[Ch4], 16) / 1.5;
+		r = (vexRT[Btn5U] == 1) ? -64 : (vexRT[Btn6U] == 1) ? 64 : deadZone(vexRT[Ch1], 16) / 1.5;
 
-		if((fabs(r) > 112)&&(r < 0))
-		{
-			r -= 36;
-		}
-		if((fabs(y) > 112)&&((y + r) > 0))
-		{
-			r += 30;
-		}
-
-		motor[leftDrive] = -y + r;
-		motor[rightDrive] = y + r;
+		motor[leftDrive] = y + r;
+		motor[rightDrive] = -y + r;
 
 		//--------------------------------------------------------------------//
 
@@ -177,7 +266,6 @@ task usercontrol()
 		//------------------------------- Hoist -------------------------------//
 
 		hoistSpeed = deadZone(vexRT[Ch2Xmtr2], 16) / 2.5;
-		displayLCDString(0, 0, "Unblocked");
 
 		if((vexRT[Btn7DXmtr2] == 1)&&(vexRT[Btn8DXmtr2] == 1))
 		{
@@ -193,12 +281,10 @@ task usercontrol()
 			if((hoistSpeed > 0)&&(SensorValue[hoistQuad] > 90))
 			{
 				hoistSpeed = 0;
-				displayLCDString(0, 0, "Blocked");
 			}
 			else if((hoistSpeed < 0)&&(SensorValue[hoistQuad] <= 15))
 			{
 				hoistSpeed = 0;
-				displayLCDString(0, 0, "Blocked");
 			}
 		}
 
@@ -219,6 +305,23 @@ task usercontrol()
 		}
 		motor[leftLift] = liftSpeed;
 		motor[rightLift] = -liftSpeed;
+
+		if((SensorValue[goalRetainerPot] > 0)&&(vexRT[Btn7U] == 1))
+		{
+			motor[goalRetainerPot] = -127;
+		}
+		else if((SensorValue[goalRetainerPot] < 2000)&&(vexRT[Btn7D] == 1))
+		{
+			motor[goalRetainerPot] = 127;
+		}
+		else if(SensorValue[goalRetainerPot] > 1600)
+		{
+			motor[goalRetainer] = 20;
+		}
+		else
+		{
+			motor[goalRetainer] = 0;
+		}
 
 		//--------------------------------------------------------------------//
 
@@ -247,7 +350,16 @@ task usercontrol()
 
 		//--------------------------------------------------------------------//
 
-		sprintf(lcdDebug, "%d", SensorValue[hoistPot]);
+		if((vexRT[Btn7R] == 1)&&(vexRT[Btn8L] == 1)&&(vexRT[Btn5D] == 1)&&(vexRT[Btn6D] == 1))
+		{
+			while((vexRT[Btn7R] == 1)&&(vexRT[Btn8L] == 1)&&(vexRT[Btn5D] == 1)&&(vexRT[Btn6D] == 1))
+			{
+				EndTimeSlice();
+			}
+			resetRobot();
+		}
+
+		sprintf(lcdDebug, "%d", SensorValue[goalRetainerPot]);
 		displayLCDCenteredString(1, lcdDebug);
 		wait1Msec(50);
 	}
