@@ -1,4 +1,5 @@
 #pragma config(Sensor, in1,    goalRetainerPot, sensorPotentiometer)
+#pragma config(Sensor, in2,    coneDetector,   sensorLineFollower)
 #pragma config(Sensor, in7,    hoistPot,       sensorPotentiometer)
 #pragma config(Sensor, in8,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl1,  liftQuad,       sensorQuadEncoder)
@@ -59,23 +60,29 @@ task autonomous()
 		}
 		case 1:
 		{
+			//Go straight & stack preload
+			straightAndStack();
+			break;
+		}
+		case 2:
+		{
 			//Left side > Cones > 20-point zone
 			leftTwentyCones();
 			break;
 		}
-		case 2:
+		case 3:
 		{
 			//Right side > Cones > 20-point zone
 			rightTwentyCones();
 			break;
 		}
-		case 3:
+		case 4:
 		{
 			//Left side > Loader > 20-point zone
 			leftTwentyLoader();
 			break;
 		}
-		case 4:
+		case 5:
 		{
 			//Right side > Loader > 20-point zone
 			rightTwentyLoader();
