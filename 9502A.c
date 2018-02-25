@@ -23,6 +23,7 @@
 
 #define TEAM_A
 #include "../Include/LCD3.0.c"
+#include "../Include/PIDsubroutines.h"
 
 //--------------------------------------------------------------------//
 
@@ -36,18 +37,6 @@ void pre_auton()
 }
 
 //--------------------------------------------------------------------//
-
-int deadZone(int inputVal, int deadZoneVal)
-{
-	if(fabs(inputVal) > deadZoneVal)
-	{
-		return inputVal;
-	}
-	else
-	{
-		return 0;
-	}
-}
 
 task autonomous()
 {
@@ -112,6 +101,8 @@ task usercontrol()
 	bool mobileGoalDetectorEnabled = true;
 	bool coneDetectorEnabled = true;
 
+	startTask(hoistPID);
+
   while(true)
 	{
 		//---------------------------- Drivetrain ----------------------------//
@@ -148,31 +139,7 @@ task usercontrol()
 
 		//------------------------------- Hoist -------------------------------//
 
-		hoistSpeed = deadZone(vexRT[Ch2Xmtr2], 16) / 2.5;
-
-		if((vexRT[Btn7DXmtr2] == 1)&&(vexRT[Btn8DXmtr2] == 1))
-		{
-			while((vexRT[Btn7DXmtr2] == 1)&&(vexRT[Btn8DXmtr2] == 1))
-			{
-				EndTimeSlice();
-			}
-			mobileGoalDetectorEnabled = !mobileGoalDetectorEnabled;
-		}
-
-		if((mobileGoalDetectorEnabled)&&(SensorValue[mobileGoalDetector] > 1750))
-		{
-			if((hoistSpeed > 0)&&(SensorValue[hoistQuad] > 90))
-			{
-				hoistSpeed = 0;
-			}
-			else if((hoistSpeed < 0)&&(SensorValue[hoistQuad] <= 15))
-			{
-				hoistSpeed = 0;
-			}
-		}
-
-		motor[leftHoist] = -hoistSpeed;
-		motor[rightHoist] = hoistSpeed;
+		//PID hoist task
 
 		//---------------------------------------------------------------------//
 
