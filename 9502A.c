@@ -60,7 +60,7 @@ task autonomous()
 		}
 		case 1:
 		{
-			//Go straight & stack preload
+			//Left/Right > Cones/Loader > Stack on mobile goal
 			straightAndStack();
 			break;
 		}
@@ -101,12 +101,16 @@ task autonomous()
 
 task usercontrol()
 {
+	//Driver control refresh rate (Hz)
+	float refreshRate = 20.0;
+
 	int y;
 	int r;
 	int liftSpeed;
 	int hoistSpeed;
 	bool mobileSideFront = true;
 	bool mobileGoalDetectorEnabled = true;
+	bool coneDetectorEnabled = true;
 
   while(true)
 	{
@@ -208,16 +212,31 @@ task usercontrol()
 
 		//------------------------------- Claw -------------------------------//
 
+		//---------- Cone detector toggle ----------//
+
+		//If buttons 5 and 6 down on partner controller are pressed
+		if((vexRT[Btn5DXmtr2] == 1) && (vexRT[Btn6DXmtr2] == 1))
+		{
+			//Wait for buttons to be released
+			while((vexRT[Btn5DXmtr2] == 1) && (vexRT[Btn6DXmtr2] == 1))
+			{
+				EndTimeSlice();
+			}
+			coneDetectorEnabled = !coneDetectorEnabled;
+		}
+
+		//------------------------------------------//
+
 		//If Button 5 up on the partner controller is pressed:
 		if(vexRT[Btn5UXmtr2] == 1)
 		{
-			//Open claw
+			//Roll down/out
 			motor[claw] = +64;
 		}
 		//Otherwise, if button 6 up on the partner controller is pressed:
 		else if(vexRT[Btn6UXmtr2] == 1)
 		{
-			//Close claw
+			//Roll up/in
 			motor[claw] = -64;
 		}
 		//Else:
@@ -225,6 +244,16 @@ task usercontrol()
 		{
 			//Leave claw as it is
 			motor[claw] = 0;
+		}
+
+		if(coneDetectorEnabled)
+		{
+			//If cone isn't in:
+			if((SensorValue[coneDetector] > 3000)&&(vexRT[Btn5UXmtr2] == 0))
+			{
+				//Stop intake rollers
+				motor[claw] = -32;
+			}
 		}
 
 		//--------------------------------------------------------------------//
@@ -238,6 +267,6 @@ task usercontrol()
 			resetRobot();
 		}
 
-		wait1Msec(50);
+		wait1Msec(1000.0/refreshRate);
 	}
 }
