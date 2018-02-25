@@ -22,8 +22,8 @@
 #include "Vex_Competition_Includes.c"
 
 #define TEAM_A
-#include "../Include/LCD3.0.c"
-#include "../Include/PIDsubroutines.h"
+#include "Include/LCD.c"
+#include "Include/PIDsubroutines.h"
 
 //--------------------------------------------------------------------//
 
