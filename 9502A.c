@@ -139,6 +139,34 @@ task lowerGoalLift()
 	return;
 }
 
+task dropCone()
+{
+	//Lower hoist
+	while(SensorValue[hoistQuad] > 60)
+	{
+		motor[leftHoist] = 64;
+		motor[rightHoist] = -64;
+	}
+	motor[leftHoist] = 16;
+	motor[rightHoist] = 16;
+
+	//Open claw/drop cone
+	motor[claw] = +127;
+	wait1Msec(500);
+
+	//Raise hoist
+	while(SensorValue[hoistQuad] < 90)
+	{
+		motor[leftHoist] = -127;
+		motor[rightHoist] = 127;
+	}
+	motor[leftHoist] = 0;
+	motor[rightHoist] = 0;
+	motor[claw] = 0;
+
+	return;
+}
+
 task autonomous()
 {
 	//Reset gyro
@@ -184,6 +212,9 @@ task autonomous()
 
 	//Drive backward
 	drive(-127, 0);
+
+	startTask(dropCone);
+
 	wait1Msec(2250);
 	stopDriving();
 
@@ -213,35 +244,6 @@ task autonomous()
 	}
 	motor[leftLift] = 0;
 	motor[rightLift] = 0;
-
-	/*
-	//Lower hoist
-	while(SensorValue[hoistQuad] > 60)
-	{
-		motor[leftHoist] = 64;
-		motor[rightHoist] = -64;
-	}
-	motor[leftHoist] = 16;
-	motor[rightHoist] = 16;
-
-	//Open claw/drop cone
-	motor[claw] = +127;
-	wait1Msec(600);
-	motor[claw] = -127;
-	wait1Msec(100);
-	motor[claw] = +127;
-	wait1Msec(1000);
-	motor[claw] = 0;
-
-	//Raise hoist
-	while(SensorValue[hoistQuad] < 90)
-	{
-		motor[leftHoist] = -127;
-		motor[rightHoist] = 127;
-	}
-	motor[leftHoist] = 0;
-	motor[rightHoist] = 0;
-	*/
 
 	//Drive backwards out of 10 point zone
 	drive(-127, 0);
