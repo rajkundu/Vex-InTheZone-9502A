@@ -1,26 +1,25 @@
 /*--------------------------------------------------//--------------------------------------------------//
 
 Team 9502, Liberty High School VEX Robotics
-File: ../Includes/LCD2.0.h
+File: ../Includes/LCD3.0.c
 Description: Contains LCD Code
 
 //--------------------------------------------------//--------------------------------------------------*/
 
-#include "../Include/A_autonomous_routines.h"
+//If team is A
+#ifdef TEAM_A
+	//Include A autonomous
+  #include "A_autonomous_routines.h"
+#endif
+//If team is B
+#ifdef TEAM_B
+  //Include B autonomous
+  #include "B_autonomous_routines.h"
+#endif
 
-int refreshRate;
+int refreshRate = 20;
 string selectString;
 short routineNum = 0;
-
-//Array of autonomous routine names
-string routineNames[] =
-{
-	"   Do Nothing   ",
-	"Mobile Goal  (R)",
-	"  TEST PROGRAM  "
-};
-
-int numRoutines = sizeof(routineNames)/sizeof(routineNames[0]);
 
 //--------------------------------------------------//--------------------------------------------------//
 
@@ -47,20 +46,13 @@ void setSelectString()
 	}
 }
 
-void setLCDRefreshRate(int inputRefreshRate)
-{
-	refreshRate = inputRefreshRate;
-	return;
-}
-
 task autonomousSelector()
 {
-		// Turn on the LCD backlight, signifying that it needs input
+	// Turn on the LCD backlight, signifying that it needs input
 	bLCDBacklight = true;
 
-	// // While the robot is disabled...
-	// // (Wouldn't want the robot to be stuck waiting for a program selection the whole match!)
-	while(!bIfiRobotDisabled)
+	// While the robot is not in autonomous mode or is disabled...
+	while(!bIfiAutonomousMode || bIfiRobotDisabled)
 	{
 		// Decide which arrows to show: left, right or both?
 		setSelectString();
