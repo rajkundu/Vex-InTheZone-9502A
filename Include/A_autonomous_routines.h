@@ -231,13 +231,16 @@ void leftTwentyCones()
 	wait1Msec(250);
 	startTask(lowerGoalLift);
 
+	//Wait before driving forward
+	wait1Msec(500);
+
 	//Drive straight
 	drive(32, 0);
 	wait1Msec(100);
 	drive(64, 0);
 	wait1Msec(100);
 	drive(127, 0);
-	wait1Msec(2350);
+	wait1Msec(1850);
 	stopDriving();
 
 	//Lift goal
@@ -266,7 +269,7 @@ void leftTwentyCones()
 
 	startTask(dropCone);
 
-	wait1Msec(2175);
+	wait1Msec(1675);
 	stopDriving();
 
 	//Pause
@@ -276,13 +279,15 @@ void leftTwentyCones()
 	gyroTurn(135, 4.5);
 	SensorValue[gyro] = 0;
 
+	//Go back along 10-point bar
 	drive(127, 0);
-	wait1Msec(700);
+	wait1Msec(500);
 	stopDriving();
+
+	//Turn perpendicular to 20-point zone
 	gyroTurn(90, 4.5);
 
-
-	//Drive straight into 20 point zone
+	//Drive straight into 20-point zone
 	drive(127, 0);
 	wait1Msec(1000);
 	stopDriving();
@@ -313,8 +318,8 @@ void leftTwentyCones()
 	motor[leftLift] = 0;
 	motor[rightLift] = 0;
 
-	//Drive backwards out of 20 point zone
-	drive(-95 , 0);
+	//Drive backwards out of 20-point zone
+	drive(-127, 0);
 	wait1Msec(1000);
 	stopDriving();
 }
@@ -334,13 +339,16 @@ void rightTwentyCones()
 	wait1Msec(250);
 	startTask(lowerGoalLift);
 
+	//Wait before driving forward
+	wait1Msec(500);
+
 	//Drive straight
 	drive(32, 0);
 	wait1Msec(100);
 	drive(64, 0);
 	wait1Msec(100);
 	drive(127, 0);
-	wait1Msec(2350);
+	wait1Msec(1850);
 	stopDriving();
 
 	//Lift goal
@@ -369,7 +377,7 @@ void rightTwentyCones()
 
 	startTask(dropCone);
 
-	wait1Msec(2175);
+	wait1Msec(1675);
 	stopDriving();
 
 	//Pause
@@ -379,13 +387,15 @@ void rightTwentyCones()
 	gyroTurn(-135, 4.5);
 	SensorValue[gyro] = 0;
 
+	//Go back along 10-point bar
 	drive(127, 0);
-	wait1Msec(700);
+	wait1Msec(500);
 	stopDriving();
+
+	//Turn perpendicular to 20-point zone
 	gyroTurn(-90, 4.5);
 
-
-	//Drive straight into 20 point zone
+	//Drive straight into 20-point zone
 	drive(127, 0);
 	wait1Msec(1000);
 	stopDriving();
@@ -416,8 +426,8 @@ void rightTwentyCones()
 	motor[leftLift] = 0;
 	motor[rightLift] = 0;
 
-	//Drive backwards out of 20 point zone
-	drive(-95 , 0);
+	//Drive backwards out of 20-point zone
+	drive(-127 , 0);
 	wait1Msec(1000);
 	stopDriving();
 }
@@ -443,7 +453,7 @@ void leftTwentyLoader()
 	drive(64, 0);
 	wait1Msec(100);
 	drive(127, 0);
-	wait1Msec(2200);
+	wait1Msec(1700);
 	stopDriving();
 
 	//Lift goal
@@ -472,7 +482,7 @@ void leftTwentyLoader()
 
 	startTask(dropCone);
 
-	wait1Msec(2250);
+	wait1Msec(1750);
 	stopDriving();
 
 	//Pause
@@ -482,13 +492,15 @@ void leftTwentyLoader()
 	gyroTurn(150, 4.5);
 	SensorValue[gyro] = 0;
 
+	//Go back along 10-point bar
 	drive(127, 0);
-	wait1Msec(300);
+	wait1Msec(400);
 	stopDriving();
+
+	//Turn perpendicular to 20-point zone
 	gyroTurn(90, 4.5);
 
-
-	//Drive straight into 20 point zone
+	//Drive straight into 20-point zone
 	drive(127, 0);
 	wait1Msec(1000);
 	stopDriving();
@@ -519,8 +531,8 @@ void leftTwentyLoader()
 	motor[leftLift] = 0;
 	motor[rightLift] = 0;
 
-	//Drive backwards out of 20 point zone
-	drive(-95 , 0);
+	//Drive backwards out of 20-point zone
+	drive(-127, 0);
 	wait1Msec(1000);
 	stopDriving();
 }
@@ -546,7 +558,7 @@ void rightTwentyLoader()
 	drive(64, 0);
 	wait1Msec(100);
 	drive(127, 0);
-	wait1Msec(2200);
+	wait1Msec(1700);
 	stopDriving();
 
 	//Lift goal
@@ -575,7 +587,7 @@ void rightTwentyLoader()
 
 	startTask(dropCone);
 
-	wait1Msec(2250);
+	wait1Msec(1750);
 	stopDriving();
 
 	//Pause
@@ -585,13 +597,15 @@ void rightTwentyLoader()
 	gyroTurn(-150, 4.5);
 	SensorValue[gyro] = 0;
 
+	//Go back along 10-point bar
 	drive(127, 0);
-	wait1Msec(300);
+	wait1Msec(400);
 	stopDriving();
+
+	//Turn perpendicular to 20-point zone
 	gyroTurn(-90, 4.5);
 
-
-	//Drive straight into 20 point zone
+	//Drive straight into 20-point zone
 	drive(127, 0);
 	wait1Msec(1000);
 	stopDriving();
@@ -622,8 +636,8 @@ void rightTwentyLoader()
 	motor[leftLift] = 0;
 	motor[rightLift] = 0;
 
-	//Drive backwards out of 20 point zone
-	drive(-95 , 0);
+	//Drive backwards out of 20-point zone
+	drive(-127, 0);
 	wait1Msec(1000);
 	stopDriving();
 }
