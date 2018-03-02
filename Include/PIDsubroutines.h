@@ -17,6 +17,7 @@ task hoistPID()
 	float ki = 0.0;
 
 	float targetPosition = 0;
+	float hoistInput = 0;
 	int error = 0;
 	int error_derivative = 0;
 	int error_integral = 0;
@@ -36,12 +37,13 @@ task hoistPID()
 
 		lastError = error;
 
-		targetPosition += deadZone(vexRT[Ch2Xmtr2], 16) / 5000.0;
+		hoistInput = deadZone(vexRT[Ch2Xmtr2], 16) / 5000.0;
+		targetPosition += ((targetPosition <= 0) && (hoistInput < 0)) ? 0 : hoistInput;
 
 		//Debug
-		sprintf(lcdDebugString, "%f", error);
+		/*sprintf(lcdDebugString, "%f", error);
 		displayLCDCenteredString(0, lcdDebugString);
 		sprintf(lcdDebugString, "%f", error_integral);
-		displayLCDCenteredString(1, lcdDebugString);
+		displayLCDCenteredString(1, lcdDebugString);*/
 	}
 }

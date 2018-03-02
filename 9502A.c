@@ -4,7 +4,6 @@
 #pragma config(Sensor, in8,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl1,  liftQuad,       sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  hoistQuad,      sensorQuadEncoder)
-#pragma config(Sensor, dgtl5,  mobileGoalDetector, sensorSONAR_raw)
 #pragma config(Sensor, dgtl7,  liftBump,       sensorTouch)
 #pragma config(Sensor, dgtl8,  hoistLimit,     sensorTouch)
 #pragma config(Motor,  port1,           goalRetainer,  tmotorVex393_HBridge, openLoop)
@@ -96,9 +95,6 @@ task usercontrol()
 	int y;
 	int r;
 	int liftSpeed;
-	int hoistSpeed;
-	bool mobileSideFront = true;
-	bool mobileGoalDetectorEnabled = true;
 	bool coneDetectorEnabled = true;
 
 	startTask(hoistPID);
@@ -107,15 +103,7 @@ task usercontrol()
 	{
 		//---------------------------- Drivetrain ----------------------------//
 
-		if((vexRT[Btn7D] == 1)&&(vexRT[Btn8D] == 1))
-		{
-			while((vexRT[Btn7D] == 1)&&(vexRT[Btn8D] == 1))
-			{
-				EndTimeSlice();
-			}
-			mobileSideFront = !mobileSideFront;
-		}
-		y = mobileSideFront ? deadZone(vexRT[Ch3], 16) : -deadZone(vexRT[Ch3], 16);
+		y = deadZone(vexRT[Ch3], 16);
 
 		//If stopped...
 		if(y != 0)
@@ -219,7 +207,7 @@ task usercontrol()
 			if((SensorValue[coneDetector] > 3000)&&(vexRT[Btn5UXmtr2] == 0))
 			{
 				//Stop intake rollers
-				motor[claw] = -32;
+				motor[claw] = -80;
 			}
 		}
 
