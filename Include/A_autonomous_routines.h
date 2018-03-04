@@ -45,7 +45,7 @@ void resetRobot()
 	}
 
 	//Release goal retainer
-	while(SensorValue[goalRetainerPot] > 0)
+	while(SensorValue[goalRetainerPot] > 600)
 	{
 		motor[goalRetainer] = -127;
 	}
@@ -293,7 +293,7 @@ void leftTwentyCones()
 	stopDriving();
 
 	//Release goal retainer
-	while(SensorValue[goalRetainerPot] > 1600)
+	while(SensorValue[goalRetainerPot] > 600)
 	{
 		motor[goalRetainer] = -127;
 	}
@@ -401,7 +401,7 @@ void rightTwentyCones()
 	stopDriving();
 
 	//Release goal retainer
-	while(SensorValue[goalRetainerPot] > 1600)
+	while(SensorValue[goalRetainerPot] > 600)
 	{
 		motor[goalRetainer] = -127;
 	}
@@ -506,7 +506,7 @@ void leftTwentyLoader()
 	stopDriving();
 
 	//Release goal retainer
-	while(SensorValue[goalRetainerPot] > 1600)
+	while(SensorValue[goalRetainerPot] > 600)
 	{
 		motor[goalRetainer] = -127;
 	}
@@ -611,7 +611,7 @@ void rightTwentyLoader()
 	stopDriving();
 
 	//Release goal retainer
-	while(SensorValue[goalRetainerPot] > 1600)
+	while(SensorValue[goalRetainerPot] > 600)
 	{
 		motor[goalRetainer] = -127;
 	}
