@@ -10,7 +10,7 @@ int deadZone(int inputVal, int deadZoneVal)
 	}
 }
 
-task hoistPID()
+/*task hoistPID()
 {
 	float kp = 4.5;
 	float kd = 3.0;
@@ -49,9 +49,9 @@ task hoistPID()
 		lastHoistInput = hoistInput;
 
 		//Debug
-		/*sprintf(lcdDebugString, "%f", error);
-		displayLCDCenteredString(0, lcdDebugString);
-		sprintf(lcdDebugString, "%f", error_integral);
-		displayLCDCenteredString(1, lcdDebugString);*/
+		//sprintf(lcdDebugString, "%f", error);
+		//displayLCDCenteredString(0, lcdDebugString);
+		//sprintf(lcdDebugString, "%f", error_integral);
+		//displayLCDCenteredString(1, lcdDebugString);
 	}
-}
+}*/

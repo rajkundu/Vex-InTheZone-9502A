@@ -94,10 +94,10 @@ task usercontrol()
 
 	int y;
 	int r;
+	float r_gain = 1.5;
 	int liftSpeed;
+	int hoistSpeed;
 	bool coneDetectorEnabled = true;
-
-	startTask(hoistPID);
 
   while(true)
 	{
@@ -115,7 +115,7 @@ task usercontrol()
 		else
 		{
 			//Make rotation full power
-			r = (vexRT[Btn5U] == 1) ? -127 : (vexRT[Btn6U] == 1) ? 127 : deadZone(vexRT[Ch1], 16);
+			r = r_gain * (vexRT[Btn5U] == 1) ? -127 : (vexRT[Btn6U] == 1) ? 127 : deadZone(vexRT[Ch1], 16);
 		}
 
 		motor[leftDrive] = y + r;
@@ -127,7 +127,9 @@ task usercontrol()
 
 		//------------------------------- Hoist -------------------------------//
 
-		//PID hoist task
+		hoistSpeed = deadZone(vexRT[Ch2Xmtr2], 16);
+		hoistSpeed = ((SensorValue[hoistQuad] < 80)&&(hoistSpeed == 0)) ? 16 : hoistSpeed;
+		motor[leftHoist] = -(motor[rightHoist] = hoistSpeed);
 
 		//---------------------------------------------------------------------//
 
