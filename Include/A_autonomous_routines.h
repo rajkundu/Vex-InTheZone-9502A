@@ -494,7 +494,7 @@ void leftTwentyLoader()
 
 	//Go back along 10-point bar
 	drive(127, 0);
-	wait1Msec(400);
+	wait1Msec(200);
 	stopDriving();
 
 	//Turn perpendicular to 20-point zone
@@ -599,7 +599,7 @@ void rightTwentyLoader()
 
 	//Go back along 10-point bar
 	drive(127, 0);
-	wait1Msec(400);
+	wait1Msec(200);
 	stopDriving();
 
 	//Turn perpendicular to 20-point zone
